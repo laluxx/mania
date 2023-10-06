@@ -24,8 +24,11 @@ Note notes[COLUMNS][MAX_NOTES];
 int lastHit = -1;
 double hitFade = 0;
 
-// game states
+// added
 bool autoPlay = false;
+Sound hitSound;
+
+
 
 
 void InitializeNotes() {
@@ -69,11 +72,11 @@ Note* GetClosestNote(int column) {
 }
 
 void HandleNoteHit(Note* note, float distance) {
-    if (distance < 10) {
+    if (distance < 30) {
         lastHit = 1;  // Marvelous
-    } else if (distance < 20) {
+    } else if (distance < 50) {
         lastHit = 2;  // Perfect
-    } else if (distance < 40) {
+    } else if (distance < 80) {
         lastHit = 3;  // Good
     } else {
         lastHit = 4;  // Bad
@@ -82,6 +85,9 @@ void HandleNoteHit(Note* note, float distance) {
     note->active = false;
     note->hitTime = GetTime() * 1000;
     hitFade = 0.5;
+    
+    // Play the sound every time the function is called, regardless of autoplay or manual hit
+    PlaySound(hitSound);
 }
 
 void MoveNotes() {
@@ -114,6 +120,7 @@ void UpdateNotes() {
 
     if (hitFade > 0) hitFade -= GetFrameTime();
 }
+
 
 void Render() {
     BeginDrawing();
@@ -150,28 +157,59 @@ void Render() {
     EndDrawing();
 }
 
+// int main(void) {
+//     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rhythm Game");
+//     SetTargetFPS(144);
+//     
+//     InitializeNotes(); // Initial setup
+//
+//     while (!WindowShouldClose()) {
+//
+//         if (IsKeyPressed(KEY_A)) {
+//             autoPlay = !autoPlay; // Toggle autoplay mode
+//         }
+//
+//
+//         if (IsKeyPressed(KEY_R)) {
+//             InitializeNotes();
+//         }
+//
+//
+//
+//         UpdateNotes();
+//         Render();
+//     }
+//
+//     CloseWindow();
+//     return 0;
+// }
+//
+
+
 int main(void) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rhythm Game");
     SetTargetFPS(144);
+
+    InitAudioDevice();  // Initialize audio device
+    hitSound = LoadSound("./samples/hitsound.ogg");
     
     InitializeNotes(); // Initial setup
 
     while (!WindowShouldClose()) {
-
         if (IsKeyPressed(KEY_A)) {
             autoPlay = !autoPlay; // Toggle autoplay mode
         }
-
 
         if (IsKeyPressed(KEY_R)) {
             InitializeNotes();
         }
 
-
-
         UpdateNotes();
         Render();
     }
+
+    UnloadSound(hitSound);  // Unload the sound
+    CloseAudioDevice();  // Close audio device
 
     CloseWindow();
     return 0;
