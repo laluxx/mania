@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "math.h"
+#include <stddef.h>
 
 #define COLUMNS 4
 #define SCREEN_WIDTH 800
@@ -20,6 +21,10 @@ Note notes[COLUMNS][MAX_NOTES];
 int lastHit = -1;
 double hitFade = 0;
 
+// game states
+bool autoPlay = false;
+
+
 void InitializeNotes() {
     for (int i = 0; i < COLUMNS; i++) {
         for (int j = 0; j < MAX_NOTES; j += (i % 2 == 0 ? 3 : 5)) { // More varied spacing
@@ -33,48 +38,129 @@ void InitializeNotes() {
     }
 }
 
+/* void UpdateNotes() { */
+/*     for (int i = 0; i < COLUMNS; i++) { */
+/*         bool keyPressed = false; */
+
+/*         switch(i) { */
+/*             case 0: keyPressed = IsKeyPressed(KEY_D); break; */
+/*             case 1: keyPressed = IsKeyPressed(KEY_F); break; */
+/*             case 2: keyPressed = IsKeyPressed(KEY_J); break; */
+/*             case 3: keyPressed = IsKeyPressed(KEY_K); break; */
+/*         } */
+
+/*         if (keyPressed) { */
+/*             // Detect the closest active note to the target for this column */
+/*             Note* closestNote = NULL; */
+/*             float minDistance = SCREEN_HEIGHT;  // An arbitrary large value */
+
+/*             for (int j = 0; j < MAX_NOTES; j++) { */
+/*                 if (notes[i][j].active) { */
+/*                     float distance = fabs(notes[i][j].position.y - (SCREEN_HEIGHT - TARGET_RADIUS)); */
+/*                     if (distance < minDistance) { */
+/*                         minDistance = distance; */
+/*                         closestNote = &notes[i][j]; */
+/*                     } */
+/*                 } */
+/*             } */
+
+/*             // Check and respond based on the distance */
+/*             if (closestNote) { */
+/*                 if (minDistance < 10) { */
+/*                     lastHit = 1;  // Marvelous */
+/*                 } else if (minDistance < 20) { */
+/*                     lastHit = 2;  // Perfect */
+/*                 } else if (minDistance < 40) { */
+/*                     lastHit = 3;  // Good */
+/*                 } else { */
+/*                     lastHit = 4;  // Bad */
+/*                 } */
+
+/*                 closestNote->active = false; */
+/*                 closestNote->hitTime = GetTime() * 1000; */
+/*                 hitFade = 0.5; */
+/*             } */
+/*         } */
+
+/*         // Update note positions and deactivate off-screen notes */
+/*         for (int j = 0; j < MAX_NOTES; j++) { */
+/*             if (notes[i][j].active) { */
+/*                 notes[i][j].position.y += notes[i][j].speed; */
+/*                 if (notes[i][j].position.y > SCREEN_HEIGHT + NOTE_RADIUS) { */
+/*                     notes[i][j].active = false; */
+/*                 } */
+/*             } */
+/*         } */
+/*     } */
+
+/*     if (hitFade > 0) hitFade -= GetFrameTime(); */
+/* } */
+
 void UpdateNotes() {
     for (int i = 0; i < COLUMNS; i++) {
+        bool keyPressed = false;
+
+        switch(i) {
+            case 0: keyPressed = IsKeyPressed(KEY_D); break;
+            case 1: keyPressed = IsKeyPressed(KEY_F); break;
+            case 2: keyPressed = IsKeyPressed(KEY_J); break;
+            case 3: keyPressed = IsKeyPressed(KEY_K); break;
+        }
+
+        Note* closestNote = NULL;
+        float minDistance = SCREEN_HEIGHT;  // An arbitrary large value
+
+        for (int j = 0; j < MAX_NOTES; j++) {
+            if (notes[i][j].active) {
+                float distance = fabs(notes[i][j].position.y - (SCREEN_HEIGHT - TARGET_RADIUS));
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestNote = &notes[i][j];
+                }
+            }
+        }
+
+        if (autoPlay && closestNote && minDistance < 10) {
+            lastHit = 1;  // Marvelous
+            closestNote->active = false;
+            closestNote->hitTime = GetTime() * 1000;
+            hitFade = 0.5;
+        } else if (keyPressed && closestNote) {
+            if (minDistance < 10) {
+                lastHit = 1;  // Marvelous
+            } else if (minDistance < 20) {
+                lastHit = 2;  // Perfect
+            } else if (minDistance < 40) {
+                lastHit = 3;  // Good
+            } else {
+                lastHit = 4;  // Bad
+            }
+
+            closestNote->active = false;
+            closestNote->hitTime = GetTime() * 1000;
+            hitFade = 0.5;
+        }
+
+        // Update note positions and deactivate off-screen notes
         for (int j = 0; j < MAX_NOTES; j++) {
             if (notes[i][j].active) {
                 notes[i][j].position.y += notes[i][j].speed;
-
                 if (notes[i][j].position.y > SCREEN_HEIGHT + NOTE_RADIUS) {
                     notes[i][j].active = false;
-                }
-
-                if ((IsKeyPressed(KEY_D) && i == 0) || 
-                    (IsKeyPressed(KEY_F) && i == 1) || 
-                    (IsKeyPressed(KEY_J) && i == 2) || 
-                    (IsKeyPressed(KEY_K) && i == 3)) {
-
-                    float distance = fabs(notes[i][j].position.y - (SCREEN_HEIGHT - TARGET_RADIUS));
-
-                    if (distance < 10) {
-                        notes[i][j].active = false;
-                        notes[i][j].hitTime = GetTime()*1000;
-                        lastHit = 1;  // Marvelous
-                        hitFade = 0.5;
-                    } else if (distance < 20) {
-                        notes[i][j].active = false;
-                        notes[i][j].hitTime = GetTime()*1000;
-                        lastHit = 2;  // Perfect
-                        hitFade = 0.5;
-                    } else if (distance < 40) {
-                        notes[i][j].active = false;
-                        notes[i][j].hitTime = GetTime()*1000;
-                        lastHit = 3;  // Good
-                        hitFade = 0.5;
-                    } else {
-                        lastHit = 4;  // Bad
-                        hitFade = 0.5;
-                    }
                 }
             }
         }
     }
+
     if (hitFade > 0) hitFade -= GetFrameTime();
 }
+
+
+
+
+
+
+
 
 void Render() {
     BeginDrawing();
@@ -118,9 +204,17 @@ int main(void) {
     InitializeNotes(); // Initial setup
 
     while (!WindowShouldClose()) {
+
+        if (IsKeyPressed(KEY_A)) {
+            autoPlay = !autoPlay; // Toggle autoplay mode
+        }
+
+
         if (IsKeyPressed(KEY_R)) {
             InitializeNotes();
         }
+
+
 
         UpdateNotes();
         Render();
