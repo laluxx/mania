@@ -5,9 +5,12 @@
 #define COLUMNS 4
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
-#define NOTE_RADIUS 25    // Increased size
-#define TARGET_RADIUS 30  // Increased size
-#define TARGET_SPACING 80 // Increased spacing
+
+#define NOTE_RADIUS 55
+#define TARGET_RADIUS (NOTE_RADIUS + 5)  // TARGET_RADIUS is 5 units larger than NOTE_RADIUS
+#define TARGET_SPACING (2.8 * NOTE_RADIUS) // TARGET_SPACING is 3 times the NOTE_RADIUS
+
+
 #define MAX_NOTES 100
 
 typedef struct {
@@ -38,110 +41,51 @@ void InitializeNotes() {
     }
 }
 
-/* void UpdateNotes() { */
-/*     for (int i = 0; i < COLUMNS; i++) { */
-/*         bool keyPressed = false; */
 
-/*         switch(i) { */
-/*             case 0: keyPressed = IsKeyPressed(KEY_D); break; */
-/*             case 1: keyPressed = IsKeyPressed(KEY_F); break; */
-/*             case 2: keyPressed = IsKeyPressed(KEY_J); break; */
-/*             case 3: keyPressed = IsKeyPressed(KEY_K); break; */
-/*         } */
+bool GetKeyPress(int column) {
+    switch(column) {
+        case 0: return IsKeyPressed(KEY_D);
+        case 1: return IsKeyPressed(KEY_F);
+        case 2: return IsKeyPressed(KEY_J);
+        case 3: return IsKeyPressed(KEY_K);
+        default: return false;
+    }
+}
 
-/*         if (keyPressed) { */
-/*             // Detect the closest active note to the target for this column */
-/*             Note* closestNote = NULL; */
-/*             float minDistance = SCREEN_HEIGHT;  // An arbitrary large value */
+Note* GetClosestNote(int column) {
+    Note* closestNote = NULL;
+    float minDistance = SCREEN_HEIGHT;  // An arbitrary large value
 
-/*             for (int j = 0; j < MAX_NOTES; j++) { */
-/*                 if (notes[i][j].active) { */
-/*                     float distance = fabs(notes[i][j].position.y - (SCREEN_HEIGHT - TARGET_RADIUS)); */
-/*                     if (distance < minDistance) { */
-/*                         minDistance = distance; */
-/*                         closestNote = &notes[i][j]; */
-/*                     } */
-/*                 } */
-/*             } */
+    for (int j = 0; j < MAX_NOTES; j++) {
+        if (notes[column][j].active) {
+            float distance = fabs(notes[column][j].position.y - (SCREEN_HEIGHT - TARGET_RADIUS));
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestNote = &notes[column][j];
+            }
+        }
+    }
+    return closestNote;
+}
 
-/*             // Check and respond based on the distance */
-/*             if (closestNote) { */
-/*                 if (minDistance < 10) { */
-/*                     lastHit = 1;  // Marvelous */
-/*                 } else if (minDistance < 20) { */
-/*                     lastHit = 2;  // Perfect */
-/*                 } else if (minDistance < 40) { */
-/*                     lastHit = 3;  // Good */
-/*                 } else { */
-/*                     lastHit = 4;  // Bad */
-/*                 } */
+void HandleNoteHit(Note* note, float distance) {
+    if (distance < 10) {
+        lastHit = 1;  // Marvelous
+    } else if (distance < 20) {
+        lastHit = 2;  // Perfect
+    } else if (distance < 40) {
+        lastHit = 3;  // Good
+    } else {
+        lastHit = 4;  // Bad
+    }
 
-/*                 closestNote->active = false; */
-/*                 closestNote->hitTime = GetTime() * 1000; */
-/*                 hitFade = 0.5; */
-/*             } */
-/*         } */
+    note->active = false;
+    note->hitTime = GetTime() * 1000;
+    hitFade = 0.5;
+}
 
-/*         // Update note positions and deactivate off-screen notes */
-/*         for (int j = 0; j < MAX_NOTES; j++) { */
-/*             if (notes[i][j].active) { */
-/*                 notes[i][j].position.y += notes[i][j].speed; */
-/*                 if (notes[i][j].position.y > SCREEN_HEIGHT + NOTE_RADIUS) { */
-/*                     notes[i][j].active = false; */
-/*                 } */
-/*             } */
-/*         } */
-/*     } */
-
-/*     if (hitFade > 0) hitFade -= GetFrameTime(); */
-/* } */
-
-void UpdateNotes() {
+void MoveNotes() {
     for (int i = 0; i < COLUMNS; i++) {
-        bool keyPressed = false;
-
-        switch(i) {
-            case 0: keyPressed = IsKeyPressed(KEY_D); break;
-            case 1: keyPressed = IsKeyPressed(KEY_F); break;
-            case 2: keyPressed = IsKeyPressed(KEY_J); break;
-            case 3: keyPressed = IsKeyPressed(KEY_K); break;
-        }
-
-        Note* closestNote = NULL;
-        float minDistance = SCREEN_HEIGHT;  // An arbitrary large value
-
-        for (int j = 0; j < MAX_NOTES; j++) {
-            if (notes[i][j].active) {
-                float distance = fabs(notes[i][j].position.y - (SCREEN_HEIGHT - TARGET_RADIUS));
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closestNote = &notes[i][j];
-                }
-            }
-        }
-
-        if (autoPlay && closestNote && minDistance < 10) {
-            lastHit = 1;  // Marvelous
-            closestNote->active = false;
-            closestNote->hitTime = GetTime() * 1000;
-            hitFade = 0.5;
-        } else if (keyPressed && closestNote) {
-            if (minDistance < 10) {
-                lastHit = 1;  // Marvelous
-            } else if (minDistance < 20) {
-                lastHit = 2;  // Perfect
-            } else if (minDistance < 40) {
-                lastHit = 3;  // Good
-            } else {
-                lastHit = 4;  // Bad
-            }
-
-            closestNote->active = false;
-            closestNote->hitTime = GetTime() * 1000;
-            hitFade = 0.5;
-        }
-
-        // Update note positions and deactivate off-screen notes
         for (int j = 0; j < MAX_NOTES; j++) {
             if (notes[i][j].active) {
                 notes[i][j].position.y += notes[i][j].speed;
@@ -151,16 +95,25 @@ void UpdateNotes() {
             }
         }
     }
+}
+
+void UpdateNotes() {
+    for (int i = 0; i < COLUMNS; i++) {
+        bool keyPressed = GetKeyPress(i);
+        Note* closestNote = GetClosestNote(i);
+        float distance = closestNote ? fabs(closestNote->position.y - (SCREEN_HEIGHT - TARGET_RADIUS)) : SCREEN_HEIGHT;
+
+        if (autoPlay && closestNote && distance < 10) {
+            HandleNoteHit(closestNote, distance);
+        } else if (keyPressed && closestNote) {
+            HandleNoteHit(closestNote, distance);
+        }
+    }
+
+    MoveNotes();
 
     if (hitFade > 0) hitFade -= GetFrameTime();
 }
-
-
-
-
-
-
-
 
 void Render() {
     BeginDrawing();
