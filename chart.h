@@ -16,6 +16,13 @@ typedef struct {
     int hitTime;
 } Note;
 
+
+typedef enum {
+    MAP_BASIC,
+    MAP_STREAM,
+    MAP_COUNT  // This value should always be last. It will be equal to the number of maps.
+} Map;
+
 // Global variable for notes (extern here, definition in .c file)
 extern Note notes[COLUMNS][MAX_NOTES];
 extern int clickCount;
@@ -37,5 +44,7 @@ void UpdateNotes();
 bool GetKeyPress(int column);
 Note* GetClosestNote(int column);
 void HandleNoteHit(Note* note, float distance);
-
+void ChangeMap(Map newMap);
+void NextMap(void);
+void ClearNotes(void);
 #endif  // CHART_H

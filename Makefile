@@ -8,7 +8,7 @@ CFLAGS = -Wall -g
 LDFLAGS = -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 # Your source file(s)
-SOURCES = main.c chart.c
+SOURCES = main.c chart.c SMparser.c
 # The output executable's name
 EXECUTABLE = rhythm_game
 

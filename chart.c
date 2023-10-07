@@ -13,18 +13,72 @@ float cps = 0;
 double lastTimeUpdated = 0;
 
 
-void InitializeNotes() {
+
+// Define the current map here
+Map currentMap = MAP_STREAM; // Set this to whichever you want to initialize
+
+void ClearNotes() {
     for (int i = 0; i < COLUMNS; i++) {
-        for (int j = 0; j < MAX_NOTES; j += (i % 2 == 0 ? 3 : 5)) {
-            notes[i][j] = (Note) {
-                .position = { SCREEN_WIDTH / 2 + TARGET_SPACING * (i - COLUMNS / 2 + 0.5f), -NOTE_RADIUS * (j+1) * 6 },
-                .speed = 10,
-                .active = true,
-                .hitTime = -1
-            };
+        for (int j = 0; j < MAX_NOTES; j++) {
+            notes[i][j].active = false; // Assuming "active" determines if a note is visible or should be processed.
         }
     }
 }
+
+
+void InitializeNotes() {
+    ClearNotes();
+    switch (currentMap) {
+        case MAP_BASIC:
+            for (int i = 0; i < COLUMNS; i++) {
+                for (int j = 0; j < MAX_NOTES; j += (i % 2 == 0 ? 3 : 5)) {
+                    notes[i][j] = (Note) {
+                        .position = { SCREEN_WIDTH / 2 + TARGET_SPACING * (i - COLUMNS / 2 + 0.5f), -NOTE_RADIUS * (j+1) * 6 },
+                        .speed = 10,
+                        .active = true,
+                        .hitTime = -1
+                    };
+                }
+            }
+            break;
+        case MAP_STREAM:
+            int streamSpacing = 1;
+            int alternatingPattern[] = {0, 1, 2, 3};
+            int patternLength = sizeof(alternatingPattern) / sizeof(alternatingPattern[0]);
+            int noteIndex = 0;
+
+            for (int j = 0; j < MAX_NOTES; j += streamSpacing) {
+                int col = alternatingPattern[noteIndex % patternLength];
+                notes[col][j] = (Note) {
+                    .position = { SCREEN_WIDTH / 2 + TARGET_SPACING * (col - COLUMNS / 2 + 0.5f), -NOTE_RADIUS * (j+1) * 6 },
+                    .speed = 13,
+                    .active = true,
+                    .hitTime = -1
+                };
+                noteIndex++;
+            }
+            break;
+        default:
+            // Handle any undefined map logic here or just ignore
+            break;
+    }
+}
+
+// maybe put the in a commons.c file
+void ChangeMap(Map newMap) {
+    if (newMap < MAP_COUNT) {  // Ensure the map is valid
+        currentMap = newMap;
+        InitializeNotes();
+    } else {
+        // Handle an invalid map request here, like setting to a default or raising an error.
+    }
+}
+
+void NextMap() {
+    currentMap = (currentMap + 1) % MAP_COUNT;
+    InitializeNotes();
+}
+
 
 void MoveNotes() {
     for (int i = 0; i < COLUMNS; i++) {
@@ -65,7 +119,6 @@ void UpdateNotes() {
 }
 
 
-// TO SEPARATE INTO input.c
 bool GetKeyPress(int column) {
     bool pressed = false;
     switch(column) {

@@ -10,8 +10,7 @@
 
 #define COLUMNS 4
 
-// functions to move into separate files
-
+// function to move into utils.c
 Color Lerp(Color a, Color b, float t) {
     if (t < 0.0f) t = 0.0f;
     if (t > 1.0f) t = 1.0f;
@@ -24,6 +23,7 @@ Color Lerp(Color a, Color b, float t) {
 
     return result;
 }
+
 
 void Render() {
     BeginDrawing();
@@ -57,13 +57,15 @@ void Render() {
         DrawText(hitText, SCREEN_WIDTH/2 - MeasureText(hitText, 30)/2, SCREEN_HEIGHT/2 - 15, 30, Fade(hitColor, hitFade));
     }
 
+
     // Render CPS counter with dynamic effects
     char cpsText[50];
     sprintf(cpsText, "CPS: %.2f", cps);
-    Vector2 position = { SCREEN_WIDTH - MeasureText(cpsText, 24) - 10, 10 };  // Top-right corner with some padding
+    Vector2 position = { 10, 10 };  // Top-left corner with some padding
+    /* Vector2 position = { SCREEN_WIDTH - MeasureText(cpsText, 24) - 10, 10 };  // Top-right corner with some padding */
 
     Color cpsColor = GREEN;
-    float cpsFontSize = 24;
+    float cpsFontSize = 54;
     if (cps > 5 && cps <= 10) {
         cpsColor = Lerp(GREEN, YELLOW, (cps - 5) / 5);
     } else if (cps > 10) {
@@ -94,6 +96,10 @@ int main(void) {
 
         if (IsKeyPressed(KEY_R)) {
             InitializeNotes();
+        }
+
+        if (IsKeyPressed(KEY_N)) {
+            NextMap();
         }
 
         UpdateNotes();

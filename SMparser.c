@@ -1,6 +1,7 @@
 #include "SMparser.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h> // For atof
 
 bool ParseValue(const char* line, const char* key, char* dest, size_t destSize) {
     size_t keyLen = strlen(key);
@@ -22,6 +23,7 @@ bool ParseSMFile(const char* pathToPack, const char* songName, SMHeader* header,
     if (!file) return false;
 
     char line[MAX_LINE_LENGTH];
+    char buffer[MAX_LINE_LENGTH]; // Temp buffer for parsing
     bool isNotesSection = false;
     int noteIndex = 0;
 
@@ -42,11 +44,25 @@ bool ParseSMFile(const char* pathToPack, const char* songName, SMHeader* header,
         }
 
         // Header parsing
-        if (!ParseValue(line, "#TITLE:", header->title, sizeof(header->title))) {
+        if (ParseValue(line, "#OFFSET:", buffer, sizeof(buffer))) {
+            header->offset = atof(buffer);
+        } else if (ParseValue(line, "#SAMPLESTART:", buffer, sizeof(buffer))) {
+            header->sampleStart = atof(buffer);
+        } else if (ParseValue(line, "#SAMPLELENGTH:", buffer, sizeof(buffer))) {
+            header->sampleLength = atof(buffer);
+        } else if (ParseValue(line, "#BPMS:", buffer, sizeof(buffer))) {
+            char* equals = strchr(buffer, '=');
+            if (equals) {
+                header->bpms = atof(equals + 1);
+            }
+        } else if (ParseValue(line, "#SELECTABLE:", buffer, sizeof(buffer))) {
+            header->selectable = (strcmp(buffer, "YES") == 0);
+        } else {
+            ParseValue(line, "#TITLE:", header->title, sizeof(header->title));
             ParseValue(line, "#SUBTITLE:", header->subtitle, sizeof(header->subtitle));
             ParseValue(line, "#ARTIST:", header->artist, sizeof(header->artist));
             ParseValue(line, "#GENRE:", header->genre, sizeof(header->genre));
-            // Continue with other fields...
+            // You can continue parsing other fields in a similar fashion...
 
             if (strncmp(line, "#NOTES:", 7) == 0) {
                 isNotesSection = true;
