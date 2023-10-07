@@ -43,6 +43,31 @@ void InitializeNotes() {
                 }
             }
             break;
+
+
+
+
+    case MAP_IDK:
+        for (int i = 0; i < COLUMNS; i++) {
+            for (int j = 0; j < MAX_NOTES; j++) {
+                if (j % 4 == 0) {  // Create a slower-paced stream with longer gaps
+                    notes[i][j] = (Note) {
+                        .position = { SCREEN_WIDTH / 2 + TARGET_SPACING * (i - COLUMNS / 2 + 0.5f), -NOTE_RADIUS * (j+1) * 2 },
+                        .speed = 12,  // Slightly slower speed
+                        .active = true,
+                        .hitTime = -1
+                    };
+                }
+            }
+        }
+        break;
+
+
+
+
+
+
+
         case MAP_STREAM:
             int streamSpacing = 1;
             int alternatingPattern[] = {0, 1, 2, 3};
@@ -82,9 +107,10 @@ void NextMap() {
 }
 
 void PrevMap() {
-    currentMap = (currentMap - 1) % MAP_COUNT;
+    currentMap = (currentMap - 1 + MAP_COUNT) % MAP_COUNT;
     InitializeNotes();
 }
+
 
 
 void MoveNotes() {

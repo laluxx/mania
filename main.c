@@ -108,9 +108,16 @@ int main(void) {
             InitializeNotes();
         }
 
-        if (IsKeyPressed(KEY_N)) {
-            NextMap();
+        if (IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT)) {
+            if (IsKeyPressed(KEY_N)) {
+                PrevMap();
+            }
+        } else {
+            if (IsKeyPressed(KEY_N)) {
+                NextMap();
+            }
         }
+
 
         if (IsKeyPressed(KEY_SPACE)) {
             isPaused = !isPaused;  // Toggle the pause state

@@ -21,6 +21,7 @@ typedef struct {
 typedef enum {
     MAP_BASIC,
     MAP_STREAM,
+    MAP_IDK,
     MAP_COUNT  // should always be last. It will be equal to the number of maps.
 } Map;
 
