@@ -81,6 +81,11 @@ void NextMap() {
     InitializeNotes();
 }
 
+void PrevMap() {
+    currentMap = (currentMap - 1) % MAP_COUNT;
+    InitializeNotes();
+}
+
 
 void MoveNotes() {
     if (isPaused) return;  // If the game is paused, don't move the notes
@@ -140,6 +145,19 @@ bool GetKeyPress(int column) {
 
     return pressed;
 }
+
+
+bool IsKeyHeld(int column) {
+    bool held = false;
+    switch(column) {
+        case 0: held = IsKeyDown(KEY_D); break;
+        case 1: held = IsKeyDown(KEY_F); break;
+        case 2: held = IsKeyDown(KEY_J); break;
+        case 3: held = IsKeyDown(KEY_K); break;
+    }
+    return held;
+}
+
 
 
 Note* GetClosestNote(int column) {

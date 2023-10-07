@@ -24,15 +24,23 @@ Color Lerp(Color a, Color b, float t) {
     return result;
 }
 
-
 void Render() {
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
     // Draw target circles
     for (int i = 0; i < COLUMNS; i++) {
-        DrawCircleLines(SCREEN_WIDTH / 2 + TARGET_SPACING * (i - COLUMNS / 2 + 0.5f), SCREEN_HEIGHT - TARGET_RADIUS, TARGET_RADIUS, DARKGRAY);
+        float currentRadius = TARGET_RADIUS; // default radius
+
+        // Check if the key corresponding to the column is being held
+        // TODO make this smooth
+        if (IsKeyHeld(i)) {
+            currentRadius -= 5;
+        }
+
+        DrawCircleLines(SCREEN_WIDTH / 2 + TARGET_SPACING * (i - COLUMNS / 2 + 0.5f), SCREEN_HEIGHT - TARGET_RADIUS, currentRadius, DARKGRAY);
     }
+
 
     // Draw falling notes
     for (int i = 0; i < COLUMNS; i++) {

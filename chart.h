@@ -9,6 +9,7 @@
 #define MAX_NOTES 1000
 #define COLUMNS 4  // TODO support keys 5k 6k
 
+
 typedef struct {
     Vector2 position;
     float speed;
@@ -32,7 +33,6 @@ extern bool autoPlay;
 extern double hitFade;
 extern int lastHit;
 extern Sound hitSound;
-
 extern bool isPaused;
 
 
@@ -49,5 +49,7 @@ Note* GetClosestNote(int column);
 void HandleNoteHit(Note* note, float distance);
 void ChangeMap(Map newMap);
 void NextMap(void);
+void PrevMap(void);
 void ClearNotes(void);
+bool IsKeyHeld(int column);
 #endif  // CHART_H
