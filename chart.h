@@ -1,13 +1,13 @@
 #ifndef CHART_H
 #define CHART_H
 
-#include "raylib.h"  // Assuming you're using Raylib for graphics and input
+#include "raylib.h"
 
 #define NOTE_RADIUS 55
 #define TARGET_RADIUS (NOTE_RADIUS + 5)
 #define TARGET_SPACING (2.8 * NOTE_RADIUS)
 #define MAX_NOTES 1000
-#define COLUMNS 4  // Assuming 4 columns, you may adjust as needed
+#define COLUMNS 4  // TODO support keys 5k 6k
 
 typedef struct {
     Vector2 position;
@@ -20,7 +20,7 @@ typedef struct {
 typedef enum {
     MAP_BASIC,
     MAP_STREAM,
-    MAP_COUNT  // This value should always be last. It will be equal to the number of maps.
+    MAP_COUNT  // should always be last. It will be equal to the number of maps.
 } Map;
 
 // Global variable for notes (extern here, definition in .c file)
@@ -32,6 +32,9 @@ extern bool autoPlay;
 extern double hitFade;
 extern int lastHit;
 extern Sound hitSound;
+
+extern bool isPaused;
+
 
 
 

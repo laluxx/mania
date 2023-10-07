@@ -11,6 +11,8 @@ bool autoPlay = false; // initialization of the first state
 int clickCount = 0;
 float cps = 0;
 double lastTimeUpdated = 0;
+bool isPaused = false;
+
 
 
 
@@ -81,6 +83,7 @@ void NextMap() {
 
 
 void MoveNotes() {
+    if (isPaused) return;  // If the game is paused, don't move the notes
     for (int i = 0; i < COLUMNS; i++) {
         for (int j = 0; j < MAX_NOTES; j++) {
             if (notes[i][j].active) {
@@ -93,7 +96,10 @@ void MoveNotes() {
     }
 }
 
+
+
 void UpdateNotes() {
+    if (isPaused) return;  // If the game is paused, don't update
     for (int i = 0; i < COLUMNS; i++) {
         bool keyPressed = GetKeyPress(i);
         Note* closestNote = GetClosestNote(i);

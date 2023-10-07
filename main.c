@@ -57,27 +57,29 @@ void Render() {
         DrawText(hitText, SCREEN_WIDTH/2 - MeasureText(hitText, 30)/2, SCREEN_HEIGHT/2 - 15, 30, Fade(hitColor, hitFade));
     }
 
-
     // Render CPS counter with dynamic effects
-    char cpsText[50];
-    sprintf(cpsText, "CPS: %.2f", cps);
-    Vector2 position = { 10, 10 };  // Top-left corner with some padding
-    /* Vector2 position = { SCREEN_WIDTH - MeasureText(cpsText, 24) - 10, 10 };  // Top-right corner with some padding */
+    {
+        char cpsText[50];
+        sprintf(cpsText, "CPS: %.2f", cps);
+        Vector2 position = { 10, 10 };  // Top-left corner with some padding
+        /* Vector2 position = { SCREEN_WIDTH - MeasureText(cpsText, 24) - 10, 10 };  // Top-right corner with some padding */
 
-    Color cpsColor = GREEN;
-    float cpsFontSize = 54;
-    if (cps > 5 && cps <= 10) {
-        cpsColor = Lerp(GREEN, YELLOW, (cps - 5) / 5);
-    } else if (cps > 10) {
-        cpsColor = Lerp(YELLOW, RED, (cps - 10) / 10);
-        position.x += (rand() % 8) - 4;  // Random movement for the "crazy" effect
-        position.y += (rand() % 8) - 4;
-        cpsFontSize += (cps - 10);  // Increase font size a bit for emphasis
+        Color cpsColor = GREEN;
+        float cpsFontSize = 54;
+        if (cps > 5 && cps <= 10) {
+            cpsColor = Lerp(GREEN, YELLOW, (cps - 5) / 5);
+        } else if (cps > 10) {
+            cpsColor = Lerp(YELLOW, RED, (cps - 10) / 10);
+            position.x += (rand() % 8) - 4;  // Random movement for the "crazy" effect
+            position.y += (rand() % 8) - 4;
+            cpsFontSize += (cps - 10);  // Increase font size a bit for emphasis
+        }
+
+        DrawText(cpsText, position.x, position.y, cpsFontSize, cpsColor);
+
+        EndDrawing();
+
     }
-
-    DrawText(cpsText, position.x, position.y, cpsFontSize, cpsColor);
-
-    EndDrawing();
 }
 
 int main(void) {
@@ -101,6 +103,11 @@ int main(void) {
         if (IsKeyPressed(KEY_N)) {
             NextMap();
         }
+
+        if (IsKeyPressed(KEY_SPACE)) {
+            isPaused = !isPaused;  // Toggle the pause state
+        }
+
 
         UpdateNotes();
         Render();
